@@ -37,7 +37,9 @@ def get_client() -> httpx.AsyncClient:
     return httpx.AsyncClient()
 
 
-async def probe_url(url: str, method: str, regex: Pattern[str] | None = None) -> UrlStats:
+async def probe_url(url: str,
+                    method: str,
+                    regex: Pattern[str] | None = None) -> UrlStats:
     """Probe a URL and return the response time and status code."""
     response_matched_regex = False
     http_client = get_client()

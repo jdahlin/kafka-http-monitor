@@ -3,3 +3,4 @@ __pycache__
 *.cer
 *.pyc
 .mypy_cache
+.ruff_cache

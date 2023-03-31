@@ -4,21 +4,21 @@ import http
 import logging
 import pickle
 from re import Pattern
-from typing import TYPE_CHECKING, cast, NewType, Any
+from typing import TYPE_CHECKING, Any, NewType, cast
 
 import asyncpg
 import typer
 from aiokafka import AIOKafkaConsumer, ConsumerRecord
 
-from kafkahelper import SaslMechanism, SecurityProtocol, create_client
+from .kafkahelper import KafkaOptions, SaslMechanism, SecurityProtocol, create_client
 
 if TYPE_CHECKING:
-    from url import UrlStats
+    from .url import UrlStats
 
 logger = logging.getLogger(__name__)
 ResultTuple = tuple[int | None, int, http.HTTPStatus | None, int | None, bool]
-UrlId = NewType('UrlId', int)
-RegexId = NewType('RegexId', int)
+UrlId = NewType("UrlId", int)
+RegexId = NewType("RegexId", int)
 regex_cache: dict[Pattern[str], RegexId] = {}
 url_cache: dict[str, UrlId] = {}
 
@@ -128,7 +128,8 @@ async def insert_or_select_regex(sql_conn: asyncpg.Connection[Any],
     regex_id = regex_cache[regex] = cast(RegexId, result[0])
     return regex_id
 
-async def insert_or_select_url(sql_conn: asyncpg.Connection[Any], url: str) -> int | None:
+async def insert_or_select_url(sql_conn: asyncpg.Connection[Any],
+                               url: str) -> int | None:
     """Insert or select an url from the database."""
     url_id = url_cache.get(url)
     if url_id is None:
@@ -138,7 +139,9 @@ async def insert_or_select_url(sql_conn: asyncpg.Connection[Any], url: str) -> i
             url_cache[url] = url_id
     return url_id
 
-async def parse_message(sql_conn: asyncpg.Connection[Any], message: ConsumerRecord) -> ResultTuple:
+
+async def parse_message(sql_conn: asyncpg.Connection[Any],
+                        message: ConsumerRecord) -> ResultTuple:
     """Parse a Kafka message."""
     url_stats: "UrlStats" = pickle.loads(message.value)  # noqa: S301
     regex_id = await insert_or_select_regex(sql_conn, url_stats.regex)
@@ -151,9 +154,38 @@ async def parse_message(sql_conn: asyncpg.Connection[Any], message: ConsumerReco
         url_stats.response_matched_regex,
     )
 
+async def async_main(kafka_options: KafkaOptions,
+                     postgresql_url: str) -> None:
+    """Async main function."""
+    consumer = create_client(
+        client_class=AIOKafkaConsumer,
+        options=kafka_options)
+
+    sql_conn = await asyncpg.connect(postgresql_url)
+    logger.info("Connected to db, creating DDL")
+
+    await sql_conn.execute(SQL_CREATE_TABLES_AND_VIEWS)
+    logger.info("DDL created")
+
+    async with consumer:
+        logger.info("Connected to kafka")
+
+        logger.info("polling messages")
+        async for message in consumer:
+            logger.info("MESSAGE! %s", message)
+            record = await parse_message(sql_conn, message)
+            await sql_conn.copy_records_to_table(
+                RESULT_TABLE,
+                records=[record],
+                columns=RECORD_COLUMNS,
+            )
+            await sql_conn.execute("COMMIT")
+
+    await sql_conn.close()
+
 
 def main(  # noqa: PLR0913
-        topic: str,
+        topics: list[str],
         kafka_cluster: str = "localhost:9092",
         kafka_sasl_certificate: str = "kafka-ca.cer",
         kafka_sasl_mechanism: SaslMechanism = SaslMechanism.PLAIN,
@@ -169,41 +201,19 @@ def main(  # noqa: PLR0913
     """
     logging.basicConfig(level=logging.INFO)
 
-    async def async_main() -> None:
-        """Async main function."""
-        consumer = create_client(
-            topic,
-            client_class=AIOKafkaConsumer,
-            kafka_cluster=kafka_cluster,
-            security_protocol=kafka_security_protocol,
-            ssl_cafile=kafka_sasl_certificate,
-            sasl_username=kakfa_sasl_username or None,
-            sasl_password=kafka_sasl_password or None,
-            sasl_mechanism=kafka_sasl_mechanism)
-
-        sql_conn = await asyncpg.connect(postgresql_url)
-        logger.info("Connected to db, creating DDL")
-
-        await sql_conn.execute(SQL_CREATE_TABLES_AND_VIEWS)
-        logger.info("DDL created")
-
-        async with consumer:
-            logger.info("Connected to kafka")
-
-            logger.info("polling messages")
-            async for message in consumer:
-                logger.info("MESSAGE! %s", message)
-                record = await parse_message(sql_conn, message)
-                await sql_conn.copy_records_to_table(
-                    RESULT_TABLE,
-                    records=[record],
-                    columns=RECORD_COLUMNS,
-                )
-                await sql_conn.execute("COMMIT")
-
-        await sql_conn.close()
-
-    asyncio.run(async_main())
+    kafka_options = KafkaOptions(
+        topics=topics,
+        cluster=kafka_cluster,
+        security_protocol=kafka_security_protocol,
+        sasl_mechanism=kafka_sasl_mechanism,
+        sasl_username=kakfa_sasl_username or None,
+        sasl_password=kafka_sasl_password or None,
+        sasl_certificate=kafka_sasl_certificate or None,
+    )
+    asyncio.run(async_main(
+        kafka_options=kafka_options,
+        postgresql_url=postgresql_url,
+    ))
 
 
 typer.run(main)

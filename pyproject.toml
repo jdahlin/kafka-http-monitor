@@ -86,8 +86,8 @@ select = [
   "PLR",   # pylint Refactor
   "PLW",   # pylint Warning
   "RUF",   # ruff-specific rules
-
 ]
+
 ignore = [
   "ANN101",
   "ANN102",
@@ -99,7 +99,6 @@ ignore = [
 "*/test_*.py" = ["S101"]
 
 [tool.mypy]
-mypy_path = "src"
 python_version = "3.11"
 strict = true
 warn_unused_configs = true
@@ -114,5 +113,4 @@ module = ["aiokafka", "aiokafka.helpers"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-env = ["TESTING=1"]
-filterwarnings = ["ignore::DeprecationWarning:certifi.core:"]
+filterwarnings = []

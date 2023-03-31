@@ -1,5 +1,6 @@
 """Helper functions for Kafka."""
 import enum
+from dataclasses import dataclass
 from typing import TypeVar, cast
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
@@ -29,27 +30,35 @@ class SaslMechanism(enum.StrEnum):
     OAUTHBEARER = "OAUTHBEARER"
 
 
+@dataclass
+class KafkaOptions:
+
+    """Kafka options."""
+
+    topics: list[str]
+    cluster: str
+    security_protocol: SecurityProtocol
+    sasl_mechanism: SaslMechanism
+    sasl_username: str | None = None
+    sasl_password: str | None = None
+    sasl_certificate: str | None = None
+
+
 def create_client(
-        *topics: str,
         client_class: type[T],
-        kafka_cluster: str,
-        security_protocol: SecurityProtocol,
-        ssl_cafile: str | None = None,
-        sasl_username: str | None = None,
-        sasl_password: str | None = None,
-        sasl_mechanism: SaslMechanism | None = SaslMechanism.PLAIN,
+        options: KafkaOptions,
 ) -> T:
     """Create a Kafka client."""
     ssl_context = None
-    if (security_protocol == SecurityProtocol.SSL or
-        security_protocol == SecurityProtocol.SASL_SSL):
-        ssl_context = create_ssl_context(cafile=ssl_cafile)
+    if (options.security_protocol == SecurityProtocol.SSL or
+            options.security_protocol == SecurityProtocol.SASL_SSL):
+        ssl_context = create_ssl_context(cafile=options.sasl_certificate)
     return cast(T, client_class(
-        *topics,
-        bootstrap_servers=kafka_cluster,
-        security_protocol=security_protocol.name,
-        sasl_mechanism=sasl_mechanism,
-        sasl_plain_username=sasl_username,
-        sasl_plain_password=sasl_password,
+        *options.topics,
+        bootstrap_servers=options.cluster,
+        security_protocol=options.security_protocol.name,
+        sasl_mechanism=options.sasl_mechanism,
+        sasl_plain_username=options.sasl_username,
+        sasl_plain_password=options.sasl_password,
         ssl_context=ssl_context,
     ))
