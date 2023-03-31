@@ -4,16 +4,16 @@ import http
 import logging
 import pickle
 from re import Pattern
-from typing import TYPE_CHECKING, Any, NewType, cast
+from typing import TYPE_CHECKING, NewType, cast, Any
 
-import asyncpg
 import typer
 from aiokafka import AIOKafkaConsumer, ConsumerRecord
+from asyncpg import Connection, connect
 
-from .kafkahelper import KafkaOptions, SaslMechanism, SecurityProtocol, create_client
+from kafkahelper import KafkaOptions, SaslMechanism, SecurityProtocol, create_client
 
 if TYPE_CHECKING:
-    from .url import UrlStats
+    from url import UrlStats
 
 logger = logging.getLogger(__name__)
 ResultTuple = tuple[int | None, int, http.HTTPStatus | None, int | None, bool]
@@ -114,7 +114,7 @@ RECORD_COLUMNS = [
 RESULT_TABLE = "result"
 
 
-async def insert_or_select_regex(sql_conn: asyncpg.Connection[Any],
+async def insert_or_select_regex(sql_conn: "Connection[Any]",
                                  regex: Pattern[str] | None) -> int | None:
     """Insert or select a regex from the database."""
     if not regex:
@@ -128,7 +128,8 @@ async def insert_or_select_regex(sql_conn: asyncpg.Connection[Any],
     regex_id = regex_cache[regex] = cast(RegexId, result[0])
     return regex_id
 
-async def insert_or_select_url(sql_conn: asyncpg.Connection[Any],
+
+async def insert_or_select_url(sql_conn: "Connection[Any]",
                                url: str) -> int | None:
     """Insert or select an url from the database."""
     url_id = url_cache.get(url)
@@ -140,7 +141,7 @@ async def insert_or_select_url(sql_conn: asyncpg.Connection[Any],
     return url_id
 
 
-async def parse_message(sql_conn: asyncpg.Connection[Any],
+async def parse_message(sql_conn: "Connection[Any]",
                         message: ConsumerRecord) -> ResultTuple:
     """Parse a Kafka message."""
     url_stats: "UrlStats" = pickle.loads(message.value)  # noqa: S301
@@ -154,6 +155,7 @@ async def parse_message(sql_conn: asyncpg.Connection[Any],
         url_stats.response_matched_regex,
     )
 
+
 async def async_main(kafka_options: KafkaOptions,
                      postgresql_url: str) -> None:
     """Async main function."""
@@ -161,7 +163,7 @@ async def async_main(kafka_options: KafkaOptions,
         client_class=AIOKafkaConsumer,
         options=kafka_options)
 
-    sql_conn = await asyncpg.connect(postgresql_url)
+    sql_conn = await connect(postgresql_url)
     logger.info("Connected to db, creating DDL")
 
     await sql_conn.execute(SQL_CREATE_TABLES_AND_VIEWS)
@@ -216,4 +218,5 @@ def main(  # noqa: PLR0913
     ))
 
 
-typer.run(main)
+if __name__ == "__main__":
+    typer.run(main)
