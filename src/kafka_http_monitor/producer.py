@@ -7,8 +7,13 @@ import time
 import typer
 from aiokafka import AIOKafkaProducer
 
-from kafkahelper import KafkaOptions, SaslMechanism, SecurityProtocol, create_client
-from url import probe_url
+from kafka_http_monitor.kafkahelper import (
+    KafkaOptions,
+    SaslMechanism,
+    SecurityProtocol,
+    create_client,
+)
+from kafka_http_monitor.url import probe_url
 
 logger = logging.getLogger(__name__)
 

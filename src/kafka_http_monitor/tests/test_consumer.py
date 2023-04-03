@@ -4,14 +4,19 @@ import http
 import pickle
 from unittest.mock import ANY, AsyncMock, MagicMock, call, patch
 
-import consumer
-from consumer import async_main
-from kafkahelper import KafkaOptions
-from url import UrlStats
+from kafka_http_monitor.consumer import (
+    RECORD_COLUMNS,
+    RESULT_TABLE,
+    SQL_CREATE_TABLES_AND_VIEWS,
+    SQL_INSERT_OR_SELECT_URL,
+    async_main,
+)
+from kafka_http_monitor.kafkahelper import KafkaOptions
+from kafka_http_monitor.url import UrlStats
 
 
-@patch("consumer.create_client")
-@patch("consumer.connect")
+@patch("kafka_http_monitor.consumer.create_client")
+@patch("kafka_http_monitor.consumer.connect")
 def test_consumer_async_main(connect: AsyncMock,
                              create_client: MagicMock,
                              kafka_options: KafkaOptions,
@@ -23,13 +28,13 @@ def test_consumer_async_main(connect: AsyncMock,
     asyncio.run(async_main(kafka_options, "postgresql://localhost"))
 
     assert sql_conn.mock_calls == [
-        call.execute(consumer.SQL_CREATE_TABLES_AND_VIEWS),
-        call.fetchrow(consumer.SQL_INSERT_OR_SELECT_URL, "http://localhost"),
+        call.execute(SQL_CREATE_TABLES_AND_VIEWS),
+        call.fetchrow(SQL_INSERT_OR_SELECT_URL, "http://localhost"),
         call.fetchrow().__getitem__(0),
         call.copy_records_to_table(
-            consumer.RESULT_TABLE,
+            RESULT_TABLE,
             records=[(ANY, 1234, http.HTTPStatus.OK, None, False)],
-            columns=consumer.RECORD_COLUMNS),
+            columns=RECORD_COLUMNS),
         call.execute("COMMIT"),
         call.close(),
     ]

@@ -5,14 +5,13 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 from aiokafka import AIOKafkaProducer
 
-import producer
-from kafkahelper import KafkaOptions
-from producer import async_main
-from url import UrlStats
+from kafka_http_monitor.kafkahelper import KafkaOptions
+from kafka_http_monitor.producer import async_main
+from kafka_http_monitor.url import UrlStats
 
 
-@patch(f"{producer.__name__}.create_client")
-@patch(f"{producer.__name__}.probe_url")
+@patch("kafka_http_monitor.producer.create_client")
+@patch("kafka_http_monitor.producer.probe_url")
 def test_async_main(probe_url: AsyncMock,
                     create_client: MagicMock,
                     kafka_options: KafkaOptions,

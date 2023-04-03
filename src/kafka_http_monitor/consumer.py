@@ -10,10 +10,15 @@ import typer
 from aiokafka import AIOKafkaConsumer, ConsumerRecord
 from asyncpg import Connection, connect
 
-from kafkahelper import KafkaOptions, SaslMechanism, SecurityProtocol, create_client
+from kafka_http_monitor.kafkahelper import (
+    KafkaOptions,
+    SaslMechanism,
+    SecurityProtocol,
+    create_client,
+)
 
 if TYPE_CHECKING:
-    from url import UrlStats
+    from kafka_http_monitor.url import UrlStats
 
 logger = logging.getLogger(__name__)
 ResultTuple = tuple[int | None, int, http.HTTPStatus | None, int | None, bool]
