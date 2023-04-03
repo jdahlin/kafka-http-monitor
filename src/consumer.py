@@ -4,7 +4,7 @@ import http
 import logging
 import pickle
 from re import Pattern
-from typing import TYPE_CHECKING, NewType, cast, Any
+from typing import TYPE_CHECKING, Any, NewType, cast
 
 import typer
 from aiokafka import AIOKafkaConsumer, ConsumerRecord
