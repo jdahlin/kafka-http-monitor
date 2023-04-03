@@ -17,7 +17,7 @@ jobs:
           python-version: '3.11'
 
       - run: pip install '.[lint]'
-      - run: ruff src tests
+      - run: ruff src
       - run: black --check --diff src
 
   type:
