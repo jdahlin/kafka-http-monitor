@@ -55,10 +55,9 @@ def create_client(
         or options.security_protocol == SecurityProtocol.SASL_SSL
     ):
         ssl_context = create_ssl_context(cafile=options.sasl_certificate)
-    return cast(
+    client = cast(
         T,
         client_class(
-            *options.topics,
             bootstrap_servers=options.cluster,
             security_protocol=options.security_protocol.name,
             sasl_mechanism=options.sasl_mechanism,
@@ -67,3 +66,6 @@ def create_client(
             ssl_context=ssl_context,
         ),
     )
+    if options.topics and isinstance(client, AIOKafkaConsumer):
+        client.subscribe(options.topics)
+    return client

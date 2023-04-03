@@ -86,5 +86,10 @@ def main(  # noqa: PLR0913
     )
 
 
-if __name__ == "__main__":
+def run() -> None:
+    """Run the producer application."""
     typer.run(main)
+
+
+if __name__ == "__main__":
+    run()
