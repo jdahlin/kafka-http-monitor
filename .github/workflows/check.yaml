@@ -15,7 +15,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-          cache: pip
 
       - run: pip install '.[lint]'
       - run: ruff src
@@ -28,7 +27,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-          cache: pip
 
       - run: pip install '.[types]'
       - run: mypy src
@@ -40,7 +38,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-          cache: pip
 
       - name: pytest
         run: |
