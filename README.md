@@ -2,8 +2,8 @@
 
 # Kafka HTTP Monitor
 
-![check](https://github.com/github/docs/actions/workflows/check.yaml/badge.svg)
-![aiven-integration-test](https://github.com/github/docs/actions/workflows/aiven-integration-test.yaml/badge.svg)
+![check](https://github.com/jdahlin/kafka-http-monitor/actions/workflows/check.yaml/badge.svg)
+![aiven-integration-test](https://github.com/jdahlin/kafka-http-monitor/actions/workflows/aiven-integration-test.yaml/badge.svg)
 
 A small tool to monitor URLs and send the results via Kafka and store them in PostgreSQL.
 
