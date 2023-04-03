@@ -18,11 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-        id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
+      - run: pip install -U pip
       - run: pip install '.[lint]'
       - run: ruff src tests
       - run: black --check --diff src
@@ -37,7 +37,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-        id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -55,7 +54,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-        id: cpython_setup
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
