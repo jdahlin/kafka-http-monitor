@@ -18,7 +18,7 @@ from kafka_http_monitor.url import probe_url
 logger = logging.getLogger(__name__)
 
 
-async def async_main(
+async def async_main(  # noqa: PLR0913
     kafka_options: KafkaOptions,
     wait_in_seconds: int,
     times: int,
