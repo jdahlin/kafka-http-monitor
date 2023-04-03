@@ -34,4 +34,4 @@ jobs:
             --kakfa-sasl-username avnadmin \
             --kafka-security-protocol sasl_ssl \
             --quit-after-messages 1 \
-            --postgresql-database-url '${{ secrets.AIVEN_TEST_DATABASE_URL }}'
+            --postgresql-url '${{ secrets.AIVEN_TEST_DATABASE_URL }}'
