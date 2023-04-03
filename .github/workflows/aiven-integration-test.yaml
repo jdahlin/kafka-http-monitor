@@ -17,7 +17,7 @@ jobs:
           kafka-http-monitor test https://www.google.com.br \
             --times 1 \
             --kafka-cluster $AIVEN_TEST_KAFKA_CLUSTER \
-            --kafka-sasl-certificate=data/aiven-test-cerificate.pem \
+            --kafka-sasl-certificate=data/aiven-test-certificate.pem \
             --kafka-sasl-mechanism SCRAM-SHA-256 \
             --kafka-sasl-password $AIVEN_TEST_KAFKA_PASSWORD \
             --kakfa-sasl-username=avnadmin \
