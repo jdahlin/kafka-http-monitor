@@ -36,6 +36,7 @@ async def async_main(  # noqa: PLR0913
             for i in range(1, last):
                 logger.info(f"Probing {method} {url} {i}/{times}")
                 url_stats = await probe_url(url=url, method=method, regex=regex)
+                logger.info("Submitting results")
                 for topic in kafka_options.topics:
                     await producer.send_and_wait(topic, pickle.dumps(url_stats))
                 if i != times:
@@ -47,6 +48,8 @@ async def async_main(  # noqa: PLR0913
         )
         raise typer.Exit(code=1) from None
 
+    logger.info("Done!")
+
 
 def main(  # noqa: PLR0913
     topics: list[str],
@@ -55,7 +58,7 @@ def main(  # noqa: PLR0913
     times: int = 1,
     wait_in_seconds: int = 5,
     kafka_cluster: str = "localhost:9092",
-    kafka_sasl_certificate: str = "kafka-ca.cer",
+    kafka_sasl_certificate: str = "",
     kakfa_sasl_username: str = "",
     kafka_sasl_password: str = "",
     kafka_security_protocol: SecurityProtocol = SecurityProtocol.PLAINTEXT,

@@ -54,7 +54,7 @@ def create_client(
         options.security_protocol == SecurityProtocol.SSL
         or options.security_protocol == SecurityProtocol.SASL_SSL
     ):
-        ssl_context = create_ssl_context(cafile=options.sasl_certificate)
+        ssl_context = create_ssl_context(cafile=options.sasl_certificate or None)
     client = cast(
         T,
         client_class(

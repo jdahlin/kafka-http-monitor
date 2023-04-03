@@ -1,0 +1,21 @@
+name: check
+
+jobs:
+  aiven-integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - run: |
+          pip install .
+          kafka-http-monitor test https://www.google.com.br
+            --times 1
+            --kafka-cluster $AIVEN_TEST_KAFKA_CLUSTER
+            --kakfa-sasl-username=avnadmin
+            --kafka-sasl-password $AIVEN_TEST_KAFKA_PASSWORD
+            --kafka-security-protocol sasl_ssl
+            --kafka-sasl-mechanism SCRAM-SHA-256
+            --kafka-sasl-certificate=data/aiven-test-cerificate.pem
