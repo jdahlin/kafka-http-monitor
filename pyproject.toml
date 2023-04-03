@@ -39,8 +39,8 @@ Source = "https://github.com/jdahlin/kafka-http-monitor"
 Tracker = "https://github.com/jdahlin/kafka-http-monitor/issues"
 
 [project.scripts]
-http-monitor = "src.producer:main"
-psql-copier = "src.consumer:main"
+http-monitor = "src.kafka_http_monitor.producer:main"
+psql-copier = "src.kafka_http_monitor.consumer:main"
 
 [tool.ruff]
 src = ["src"]
