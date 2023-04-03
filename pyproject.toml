@@ -40,7 +40,7 @@ Tracker = "https://github.com/jdahlin/kafka-http-monitor/issues"
 
 [project.scripts]
 kafka-http-monitor = "kafka_http_monitor.producer:run"
-kafka-http-copier = "kafka_http_monitor.consumer:main"
+kafka-http-copier = "kafka_http_monitor.consumer:run"
 
 [tool.ruff]
 src = ["src"]

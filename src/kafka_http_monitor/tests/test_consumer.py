@@ -27,7 +27,7 @@ def test_consumer_async_main(
     connect.return_value = sql_conn = AsyncMock()
     create_client.return_value = kafka_consumer = MagicMock()
     kafka_consumer.__aiter__.return_value = [MagicMock(value=pickle.dumps(url_stats))]
-    asyncio.run(async_main(kafka_options, "postgresql://localhost"))
+    asyncio.run(async_main(kafka_options, "postgresql://localhost", 0))
 
     assert sql_conn.mock_calls == [
         call.execute(SQL_CREATE_TABLES_AND_VIEWS),

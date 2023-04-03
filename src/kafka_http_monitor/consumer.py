@@ -3,7 +3,6 @@ import asyncio
 import http
 import logging
 import pickle
-from re import Pattern
 from typing import TYPE_CHECKING, Any, NewType, cast
 
 import typer
@@ -25,7 +24,7 @@ logger = logging.getLogger(__name__)
 ResultTuple = tuple[int | None, int, http.HTTPStatus | None, int | None, bool]
 UrlId = NewType("UrlId", int)
 RegexId = NewType("RegexId", int)
-regex_cache: dict[Pattern[str], RegexId] = {}
+regex_cache: dict[str, RegexId] = {}
 url_cache: dict[str, UrlId] = {}
 
 SQL_CREATE_TABLES_AND_VIEWS = """
@@ -122,7 +121,7 @@ RESULT_TABLE = "result"
 
 async def insert_or_select_regex(
     sql_conn: "Connection[Any]",
-    regex: Pattern[str] | None,
+    regex: str | None,
 ) -> int | None:
     """Insert or select a regex from the database."""
     if not regex:
@@ -153,7 +152,7 @@ async def parse_message(
     message: ConsumerRecord,
 ) -> ResultTuple:
     """Parse a Kafka message."""
-    url_stats: "UrlStats" = pickle.loads(message.value)  # noqa: S301
+    url_stats: "UrlStats" = pickle.loads(message.value)
     regex_id = await insert_or_select_regex(sql_conn, url_stats.regex)
     url_id = await insert_or_select_url(sql_conn, url_stats.url)
     return (
@@ -165,7 +164,11 @@ async def parse_message(
     )
 
 
-async def async_main(kafka_options: KafkaOptions, postgresql_url: str) -> None:
+async def async_main(
+    kafka_options: KafkaOptions,
+    postgresql_url: str,
+    quit_after_messages: int,
+) -> None:
     """Async main function."""
     consumer = create_client(client_class=AIOKafkaConsumer, options=kafka_options)
 
@@ -180,8 +183,10 @@ async def async_main(kafka_options: KafkaOptions, postgresql_url: str) -> None:
             logger.info("Connected to kafka")
 
             logger.info("polling messages")
+            received = 0
             async for message in consumer:
-                logger.info("MESSAGE! %s", message)
+                received = received + 1
+                logger.info("MESSAGE! %s %s", message, received)
                 record = await parse_message(sql_conn, message)
                 await sql_conn.copy_records_to_table(
                     RESULT_TABLE,
@@ -189,6 +194,8 @@ async def async_main(kafka_options: KafkaOptions, postgresql_url: str) -> None:
                     columns=RECORD_COLUMNS,
                 )
                 await sql_conn.execute("COMMIT")
+                if quit_after_messages > 0 and quit_after_messages == received:
+                    break
     except KafkaConnectionError:
         await consumer.stop()
         typer.echo(
@@ -208,6 +215,7 @@ def main(  # noqa: PLR0913
     kafka_sasl_password: str = "",
     kafka_security_protocol: SecurityProtocol = SecurityProtocol.PLAINTEXT,
     postgresql_url: str = "postgresql://postgres@localhost/postgres",
+    quit_after_messages: int = 0,
 ) -> None:
     """Entry point for consumer.
 
@@ -229,9 +237,15 @@ def main(  # noqa: PLR0913
         async_main(
             kafka_options=kafka_options,
             postgresql_url=postgresql_url,
+            quit_after_messages=quit_after_messages,
         ),
     )
 
 
-if __name__ == "__main__":
+def run() -> None:
+    """Run the consumer application."""
     typer.run(main)
+
+
+if __name__ == "__main__":
+    run()

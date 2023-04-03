@@ -5,7 +5,6 @@ import re
 import time
 from dataclasses import dataclass
 from functools import lru_cache
-from re import Pattern
 
 import httpx
 
@@ -22,7 +21,7 @@ class UrlStats:
     response_time_in_milliseconds: int
     # None indicates that the request failed
     response_status_code: http.HTTPStatus | None
-    regex: Pattern[str] | None = None
+    regex: str | None = None
     response_matched_regex: bool = False
 
 
@@ -46,7 +45,6 @@ async def probe_url(
 ) -> UrlStats:
     """Probe a URL and return the response time and status code."""
     response_matched_regex = False
-    regex_compiled = None
     http_client = get_client()
     start = time.perf_counter_ns()
     try:
@@ -61,12 +59,11 @@ async def probe_url(
         response_time_in_milliseconds = (end - start) // 1_000_000
         response_status_code = http.HTTPStatus(response.status_code)
         if regex is not None:
-            regex_compiled = re.compile(regex)
-            response_matched_regex = regex_compiled.match(response.text) is not None
+            response_matched_regex = re.match(regex, response.text) is not None
 
     return UrlStats(
         method=method,
-        regex=regex_compiled if regex is not None else None,
+        regex=regex,
         response_matched_regex=response_matched_regex,
         response_status_code=response_status_code,
         response_time_in_milliseconds=response_time_in_milliseconds,
