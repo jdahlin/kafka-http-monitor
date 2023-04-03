@@ -120,7 +120,8 @@ RESULT_TABLE = "result"
 
 
 async def insert_or_select_regex(
-    sql_conn: "Connection[Any]", regex: Pattern[str] | None
+    sql_conn: "Connection[Any]",
+    regex: Pattern[str] | None,
 ) -> int | None:
     """Insert or select a regex from the database."""
     if not regex:
@@ -147,7 +148,8 @@ async def insert_or_select_url(sql_conn: "Connection[Any]", url: str) -> int | N
 
 
 async def parse_message(
-    sql_conn: "Connection[Any]", message: ConsumerRecord
+    sql_conn: "Connection[Any]",
+    message: ConsumerRecord,
 ) -> ResultTuple:
     """Parse a Kafka message."""
     url_stats: "UrlStats" = pickle.loads(message.value)  # noqa: S301
@@ -219,7 +221,7 @@ def main(  # noqa: PLR0913
         async_main(
             kafka_options=kafka_options,
             postgresql_url=postgresql_url,
-        )
+        ),
     )
 
 

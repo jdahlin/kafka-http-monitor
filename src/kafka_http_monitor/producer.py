@@ -19,7 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 async def async_main(
-    kafka_options: KafkaOptions, wait_in_seconds: int, times: int, url: str, method: str
+    kafka_options: KafkaOptions,
+    wait_in_seconds: int,
+    times: int,
+    url: str,
+    method: str,
 ) -> None:
     """Async main function."""
     producer = create_client(client_class=AIOKafkaProducer, options=kafka_options)
@@ -67,7 +71,7 @@ def main(  # noqa: PLR0913
             times=times,
             wait_in_seconds=wait_in_seconds,
             kafka_options=kafka_options,
-        )
+        ),
     )
 
 
