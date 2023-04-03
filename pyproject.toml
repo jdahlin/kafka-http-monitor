@@ -30,7 +30,7 @@ path = "src/kafka_http_monitor/__version__.py"
 
 [project.optional-dependencies]
 lint = ["black", "ruff"]
-types = ["mypy", "asyncpg-stubs"]
+types = ["mypy", "asyncpg-stubs", "pytest"]
 test = ["pytest"]
 dev = ["kafka-http-monitor[lint,types,test]"]
 
