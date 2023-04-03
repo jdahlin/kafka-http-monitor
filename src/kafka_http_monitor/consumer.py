@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, NewType, cast
 import typer
 from aiokafka import AIOKafkaConsumer, ConsumerRecord
 from asyncpg import Connection, connect
+from kafka.errors import KafkaConnectionError
 
 from kafka_http_monitor.kafkahelper import (
     KafkaOptions,
@@ -174,19 +175,26 @@ async def async_main(kafka_options: KafkaOptions, postgresql_url: str) -> None:
     await sql_conn.execute(SQL_CREATE_TABLES_AND_VIEWS)
     logger.info("DDL created")
 
-    async with consumer:
-        logger.info("Connected to kafka")
+    try:
+        async with consumer:
+            logger.info("Connected to kafka")
 
-        logger.info("polling messages")
-        async for message in consumer:
-            logger.info("MESSAGE! %s", message)
-            record = await parse_message(sql_conn, message)
-            await sql_conn.copy_records_to_table(
-                RESULT_TABLE,
-                records=[record],
-                columns=RECORD_COLUMNS,
-            )
-            await sql_conn.execute("COMMIT")
+            logger.info("polling messages")
+            async for message in consumer:
+                logger.info("MESSAGE! %s", message)
+                record = await parse_message(sql_conn, message)
+                await sql_conn.copy_records_to_table(
+                    RESULT_TABLE,
+                    records=[record],
+                    columns=RECORD_COLUMNS,
+                )
+                await sql_conn.execute("COMMIT")
+    except KafkaConnectionError:
+        await consumer.stop()
+        typer.echo(
+            f"Unable to connect to Kafka cluster {kafka_options.cluster}. Exiting.",
+        )
+        raise typer.Exit(code=1) from None
 
     await sql_conn.close()
 

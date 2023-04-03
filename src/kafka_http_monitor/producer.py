@@ -6,6 +6,7 @@ import time
 
 import typer
 from aiokafka import AIOKafkaProducer
+from kafka.errors import KafkaConnectionError
 
 from kafka_http_monitor.kafkahelper import (
     KafkaOptions,
@@ -30,14 +31,21 @@ async def async_main(  # noqa: PLR0913
     producer = create_client(client_class=AIOKafkaProducer, options=kafka_options)
     last = times + 1
 
-    async with producer:
-        for i in range(1, last):
-            logger.info(f"Probing {method} {url} {i}/{times}")
-            url_stats = await probe_url(url=url, method=method, regex=regex)
-            for topic in kafka_options.topics:
-                await producer.send_and_wait(topic, pickle.dumps(url_stats))
-            if i != times:
-                time.sleep(wait_in_seconds)
+    try:
+        async with producer:
+            for i in range(1, last):
+                logger.info(f"Probing {method} {url} {i}/{times}")
+                url_stats = await probe_url(url=url, method=method, regex=regex)
+                for topic in kafka_options.topics:
+                    await producer.send_and_wait(topic, pickle.dumps(url_stats))
+                if i != times:
+                    time.sleep(wait_in_seconds)
+    except KafkaConnectionError:
+        await producer.stop()
+        typer.echo(
+            f"Unable to connect to Kafka cluster {kafka_options.cluster}. Exiting.",
+        )
+        raise typer.Exit(code=1) from None
 
 
 def main(  # noqa: PLR0913
