@@ -13,7 +13,7 @@ A small tool to monitor URLs and send the results via Kafka and store them in Po
 - 📊  Pytest for testing.
 - 📝  Uses Black for code formatting.
 - ⚖️  Uses ruff for linting
-- 📦  Integration testing using Aiven.io
+- 📦  GHA post-commit tests and manual integration testing using Aiven.io
 
 How to run
 ==========
