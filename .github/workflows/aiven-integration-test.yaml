@@ -15,9 +15,9 @@ jobs:
       - run: |
           pip install .
           kafka-http-monitor test https://www.google.com.br \
-            --kafka-cluster '${{ secret.AIVEN_TEST_KAFKA_CLUSTER }}' \
+            --kafka-cluster '${{ secrets.AIVEN_TEST_KAFKA_CLUSTER }}' \
             --kafka-sasl-certificate data/aiven-test-certificate.pem \
             --kafka-sasl-mechanism SCRAM-SHA-256 \
-            --kafka-sasl-password '${{ secret.AIVEN_TEST_KAFKA_PASSWORD }}' \
+            --kafka-sasl-password '${{ secrets.AIVEN_TEST_KAFKA_PASSWORD }}' \
             --kakfa-sasl-username avnadmin \
             --kafka-security-protocol sasl_ssl
