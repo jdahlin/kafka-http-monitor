@@ -21,6 +21,7 @@ How to run
 `$ pip install .`
 
 To run the monitor which checks a website, use the `kafka-http-monitor` command:
+
 `$ kafka-http-monitor url`
 
 By default, it will run one time and exit. To run several times pass in the `--times` command line option:
@@ -53,6 +54,7 @@ Develop
 To start developing on this project, first install pre-commit hooks:
 
 `$ pip install pre-commit`
+
 `$ pre-commit install`
 
 Then, install the development dependencies:
