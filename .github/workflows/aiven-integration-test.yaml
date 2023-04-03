@@ -1,5 +1,8 @@
 name: check
 
+on:
+  workflow_dispatch:
+
 jobs:
   aiven-integration-test:
     runs-on: ubuntu-latest
