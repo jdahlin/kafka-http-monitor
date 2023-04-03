@@ -27,10 +27,10 @@ def test_async_main(
     create_client.return_value = producer
     producer.send_and_wait = AsyncMock()
 
-    asyncio.run(async_main(kafka_options, 1, 1, "http://localhost", "GET"))
+    asyncio.run(async_main(kafka_options, 1, 1, "http://localhost", "GET", ""))
 
     assert probe_url.mock_calls == [
-        call(url="http://localhost", method="GET"),
+        call(url="http://localhost", method="GET", regex=""),
     ]
     assert create_client.mock_calls == [
         call(client_class=AIOKafkaProducer, options=kafka_options),
