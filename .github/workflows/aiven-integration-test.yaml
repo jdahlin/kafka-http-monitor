@@ -33,4 +33,5 @@ jobs:
             --kafka-sasl-password '${{ secrets.AIVEN_TEST_KAFKA_PASSWORD }}' \
             --kakfa-sasl-username avnadmin \
             --kafka-security-protocol sasl_ssl \
-            --quit-after-messages 1
+            --quit-after-messages 1 \
+            --postgresql-database-url '${{ secrets.AIVEN_TEST_DATABASE_URL }}'
