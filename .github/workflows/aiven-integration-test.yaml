@@ -2,6 +2,11 @@ name: integration test
 
 on:
   workflow_dispatch:
+    secrets:
+      AIVEN_TEST_KAFKA_CLUSTER:
+        required: true
+      AIVEN_TEST_KAFKA_PASSWORD:
+        required: true
 
 jobs:
   aiven-integration-test:
