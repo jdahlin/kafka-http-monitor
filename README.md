@@ -19,8 +19,33 @@ How to run
 ==========
 
 `$ pip install .`
-`$ kafka-http-monitor topic url`
+
+To run the monitor which checks a website, use the `kafka-http-monitor` command:
+`$ kafka-http-monitor url`
+
+By default, it will run one time and exit. To run several times pass in the `--times` command line option:
+
+`$ kafka-http-monitor --times 10 url`
+
+It waits by 5 seconds between each runs unless you specify another value with `--wait_in_seconds`:
+
+`$ kafka-http-monitor --times 10 --wait_in_seconds 10 url`
+
+To receive the results from kafka and store them in a database use:
+
 `$ kafka-http-copier topic`
+
+
+By default, both commands will connect to kafka and postgresql installed locally, to connect to a cloud instance,
+use a combination of:
+*
+* --kafka-cluster
+* --kafka-security-protocol
+* --kafka-sasl-username
+* --kafka-sasl-password
+* --kafka-sasl-certificate
+* --kafka-sasl-mechanism
+* --postgresql-url (only for copier)
 
 Develop
 =======
