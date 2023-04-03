@@ -42,10 +42,11 @@ def get_client() -> httpx.AsyncClient:
 async def probe_url(
     url: str,
     method: str,
-    regex: Pattern[str] | None = None,
+    regex: str,
 ) -> UrlStats:
     """Probe a URL and return the response time and status code."""
     response_matched_regex = False
+    regex_compiled = None
     http_client = get_client()
     start = time.perf_counter_ns()
     try:
@@ -60,11 +61,12 @@ async def probe_url(
         response_time_in_milliseconds = (end - start) // 1_000_000
         response_status_code = http.HTTPStatus(response.status_code)
         if regex is not None:
-            response_matched_regex = regex.match(response.text) is not None
+            regex_compiled = re.compile(regex)
+            response_matched_regex = regex_compiled.match(response.text) is not None
 
     return UrlStats(
         method=method,
-        regex=re.compile(regex.pattern) if regex is not None else None,
+        regex=regex_compiled if regex is not None else None,
         response_matched_regex=response_matched_regex,
         response_status_code=response_status_code,
         response_time_in_milliseconds=response_time_in_milliseconds,
