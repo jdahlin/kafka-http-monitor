@@ -24,6 +24,7 @@ async def async_main(
     times: int,
     url: str,
     method: str,
+    regex: str,
 ) -> None:
     """Async main function."""
     producer = create_client(client_class=AIOKafkaProducer, options=kafka_options)
@@ -32,7 +33,7 @@ async def async_main(
     async with producer:
         for i in range(1, last):
             logger.info(f"Probing {method} {url} {i}/{times}")
-            url_stats = await probe_url(url=url, method=method)
+            url_stats = await probe_url(url=url, method=method, regex=regex)
             for topic in kafka_options.topics:
                 await producer.send_and_wait(topic, pickle.dumps(url_stats))
             if i != times:
@@ -51,6 +52,7 @@ def main(  # noqa: PLR0913
     kafka_sasl_password: str = "",
     kafka_security_protocol: SecurityProtocol = SecurityProtocol.PLAINTEXT,
     kafka_sasl_mechanism: SaslMechanism = SaslMechanism.PLAIN,
+    regex: str = "",
 ) -> None:
     """Entry point for producer."""
     logging.basicConfig(level=logging.INFO)
@@ -71,6 +73,7 @@ def main(  # noqa: PLR0913
             times=times,
             wait_in_seconds=wait_in_seconds,
             kafka_options=kafka_options,
+            regex=regex,
         ),
     )
 
