@@ -19,7 +19,7 @@ jobs:
 
       - run: |
           pip install .
-          echo kafka-http-monitor test https://www.google.com.br \
+          kafka-http-monitor test https://www.google.com.br \
             --kafka-cluster '${{ secrets.AIVEN_TEST_KAFKA_CLUSTER }}' \
             --kafka-sasl-certificate data/aiven-test-certificate.pem \
             --kafka-sasl-mechanism SCRAM-SHA-256 \
