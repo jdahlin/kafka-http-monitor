@@ -45,20 +45,25 @@ class KafkaOptions:
 
 
 def create_client(
-        client_class: type[T],
-        options: KafkaOptions,
+    client_class: type[T],
+    options: KafkaOptions,
 ) -> T:
     """Create a Kafka client."""
     ssl_context = None
-    if (options.security_protocol == SecurityProtocol.SSL or
-            options.security_protocol == SecurityProtocol.SASL_SSL):
+    if (
+        options.security_protocol == SecurityProtocol.SSL
+        or options.security_protocol == SecurityProtocol.SASL_SSL
+    ):
         ssl_context = create_ssl_context(cafile=options.sasl_certificate)
-    return cast(T, client_class(
-        *options.topics,
-        bootstrap_servers=options.cluster,
-        security_protocol=options.security_protocol.name,
-        sasl_mechanism=options.sasl_mechanism,
-        sasl_plain_username=options.sasl_username,
-        sasl_plain_password=options.sasl_password,
-        ssl_context=ssl_context,
-    ))
+    return cast(
+        T,
+        client_class(
+            *options.topics,
+            bootstrap_servers=options.cluster,
+            security_protocol=options.security_protocol.name,
+            sasl_mechanism=options.sasl_mechanism,
+            sasl_plain_username=options.sasl_username,
+            sasl_plain_password=options.sasl_password,
+            ssl_context=ssl_context,
+        ),
+    )

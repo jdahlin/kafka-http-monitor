@@ -12,10 +12,12 @@ from kafka_http_monitor.url import UrlStats
 
 @patch("kafka_http_monitor.producer.create_client")
 @patch("kafka_http_monitor.producer.probe_url")
-def test_async_main(probe_url: AsyncMock,
-                    create_client: MagicMock,
-                    kafka_options: KafkaOptions,
-                    url_stats: UrlStats) -> None:
+def test_async_main(
+    probe_url: AsyncMock,
+    create_client: MagicMock,
+    kafka_options: KafkaOptions,
+    url_stats: UrlStats,
+) -> None:
     """Test the consumer async main function."""
     probe_url.return_value = url_stats
     producer = MagicMock(

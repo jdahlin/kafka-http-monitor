@@ -18,15 +18,11 @@ from kafka_http_monitor.url import probe_url
 logger = logging.getLogger(__name__)
 
 
-async def async_main(kafka_options: KafkaOptions,
-                     wait_in_seconds: int,
-                     times: int,
-                     url: str,
-                     method: str) -> None:
+async def async_main(
+    kafka_options: KafkaOptions, wait_in_seconds: int, times: int, url: str, method: str
+) -> None:
     """Async main function."""
-    producer = create_client(
-        client_class=AIOKafkaProducer,
-        options=kafka_options)
+    producer = create_client(client_class=AIOKafkaProducer, options=kafka_options)
     last = times + 1
 
     async with producer:
@@ -40,17 +36,17 @@ async def async_main(kafka_options: KafkaOptions,
 
 
 def main(  # noqa: PLR0913
-        topics: list[str],
-        url: str,
-        method: str = "GET",
-        times: int = 1,
-        wait_in_seconds: int = 5,
-        kafka_cluster: str = "localhost:9092",
-        kafka_sasl_certificate: str = "kafka-ca.cer",
-        kakfa_sasl_username: str = "",
-        kafka_sasl_password: str = "",
-        kafka_security_protocol: SecurityProtocol = SecurityProtocol.PLAINTEXT,
-        kafka_sasl_mechanism: SaslMechanism = SaslMechanism.PLAIN,
+    topics: list[str],
+    url: str,
+    method: str = "GET",
+    times: int = 1,
+    wait_in_seconds: int = 5,
+    kafka_cluster: str = "localhost:9092",
+    kafka_sasl_certificate: str = "kafka-ca.cer",
+    kakfa_sasl_username: str = "",
+    kafka_sasl_password: str = "",
+    kafka_security_protocol: SecurityProtocol = SecurityProtocol.PLAINTEXT,
+    kafka_sasl_mechanism: SaslMechanism = SaslMechanism.PLAIN,
 ) -> None:
     """Entry point for producer."""
     logging.basicConfig(level=logging.INFO)
@@ -64,13 +60,16 @@ def main(  # noqa: PLR0913
         sasl_password=kafka_sasl_password or None,
         sasl_certificate=kafka_sasl_certificate or None,
     )
-    asyncio.run(async_main(
-        url=url,
-        method=method,
-        times=times,
-        wait_in_seconds=wait_in_seconds,
-        kafka_options=kafka_options,
-    ))
+    asyncio.run(
+        async_main(
+            url=url,
+            method=method,
+            times=times,
+            wait_in_seconds=wait_in_seconds,
+            kafka_options=kafka_options,
+        )
+    )
+
 
 if __name__ == "__main__":
     typer.run(main)

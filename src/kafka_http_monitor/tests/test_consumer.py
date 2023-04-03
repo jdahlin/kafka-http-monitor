@@ -17,10 +17,12 @@ from kafka_http_monitor.url import UrlStats
 
 @patch("kafka_http_monitor.consumer.create_client")
 @patch("kafka_http_monitor.consumer.connect")
-def test_consumer_async_main(connect: AsyncMock,
-                             create_client: MagicMock,
-                             kafka_options: KafkaOptions,
-                             url_stats: UrlStats) -> None:
+def test_consumer_async_main(
+    connect: AsyncMock,
+    create_client: MagicMock,
+    kafka_options: KafkaOptions,
+    url_stats: UrlStats,
+) -> None:
     """Test the consumer async main function."""
     connect.return_value = sql_conn = AsyncMock()
     create_client.return_value = kafka_consumer = MagicMock()
@@ -34,7 +36,8 @@ def test_consumer_async_main(connect: AsyncMock,
         call.copy_records_to_table(
             RESULT_TABLE,
             records=[(ANY, 1234, http.HTTPStatus.OK, None, False)],
-            columns=RECORD_COLUMNS),
+            columns=RECORD_COLUMNS,
+        ),
         call.execute("COMMIT"),
         call.close(),
     ]

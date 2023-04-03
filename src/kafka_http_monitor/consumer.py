@@ -119,8 +119,9 @@ RECORD_COLUMNS = [
 RESULT_TABLE = "result"
 
 
-async def insert_or_select_regex(sql_conn: "Connection[Any]",
-                                 regex: Pattern[str] | None) -> int | None:
+async def insert_or_select_regex(
+    sql_conn: "Connection[Any]", regex: Pattern[str] | None
+) -> int | None:
     """Insert or select a regex from the database."""
     if not regex:
         return None
@@ -134,20 +135,20 @@ async def insert_or_select_regex(sql_conn: "Connection[Any]",
     return regex_id
 
 
-async def insert_or_select_url(sql_conn: "Connection[Any]",
-                               url: str) -> int | None:
+async def insert_or_select_url(sql_conn: "Connection[Any]", url: str) -> int | None:
     """Insert or select an url from the database."""
     url_id = url_cache.get(url)
     if url_id is None:
-        result = (await sql_conn.fetchrow(SQL_INSERT_OR_SELECT_URL, url))
+        result = await sql_conn.fetchrow(SQL_INSERT_OR_SELECT_URL, url)
         if result is not None:
             url_id = cast(UrlId, result[0])
             url_cache[url] = url_id
     return url_id
 
 
-async def parse_message(sql_conn: "Connection[Any]",
-                        message: ConsumerRecord) -> ResultTuple:
+async def parse_message(
+    sql_conn: "Connection[Any]", message: ConsumerRecord
+) -> ResultTuple:
     """Parse a Kafka message."""
     url_stats: "UrlStats" = pickle.loads(message.value)  # noqa: S301
     regex_id = await insert_or_select_regex(sql_conn, url_stats.regex)
@@ -161,12 +162,9 @@ async def parse_message(sql_conn: "Connection[Any]",
     )
 
 
-async def async_main(kafka_options: KafkaOptions,
-                     postgresql_url: str) -> None:
+async def async_main(kafka_options: KafkaOptions, postgresql_url: str) -> None:
     """Async main function."""
-    consumer = create_client(
-        client_class=AIOKafkaConsumer,
-        options=kafka_options)
+    consumer = create_client(client_class=AIOKafkaConsumer, options=kafka_options)
 
     sql_conn = await connect(postgresql_url)
     logger.info("Connected to db, creating DDL")
@@ -192,14 +190,14 @@ async def async_main(kafka_options: KafkaOptions,
 
 
 def main(  # noqa: PLR0913
-        topics: list[str],
-        kafka_cluster: str = "localhost:9092",
-        kafka_sasl_certificate: str = "kafka-ca.cer",
-        kafka_sasl_mechanism: SaslMechanism = SaslMechanism.PLAIN,
-        kakfa_sasl_username: str = "",
-        kafka_sasl_password: str = "",
-        kafka_security_protocol: SecurityProtocol = SecurityProtocol.PLAINTEXT,
-        postgresql_url: str = "postgresql://postgres@localhost/postgres",
+    topics: list[str],
+    kafka_cluster: str = "localhost:9092",
+    kafka_sasl_certificate: str = "kafka-ca.cer",
+    kafka_sasl_mechanism: SaslMechanism = SaslMechanism.PLAIN,
+    kakfa_sasl_username: str = "",
+    kafka_sasl_password: str = "",
+    kafka_security_protocol: SecurityProtocol = SecurityProtocol.PLAINTEXT,
+    postgresql_url: str = "postgresql://postgres@localhost/postgres",
 ) -> None:
     """Entry point for consumer.
 
@@ -217,10 +215,12 @@ def main(  # noqa: PLR0913
         sasl_password=kafka_sasl_password or None,
         sasl_certificate=kafka_sasl_certificate or None,
     )
-    asyncio.run(async_main(
-        kafka_options=kafka_options,
-        postgresql_url=postgresql_url,
-    ))
+    asyncio.run(
+        async_main(
+            kafka_options=kafka_options,
+            postgresql_url=postgresql_url,
+        )
+    )
 
 
 if __name__ == "__main__":
