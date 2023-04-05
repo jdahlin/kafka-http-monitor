@@ -1,7 +1,8 @@
 """Kafka producer tests."""
 import asyncio
+import dataclasses
 import http
-import pickle
+import json
 from unittest.mock import ANY, AsyncMock, MagicMock, call, patch
 
 from kafka_http_monitor.consumer import (
@@ -26,7 +27,9 @@ def test_consumer_async_main(
     """Test the consumer async main function."""
     connect.return_value = sql_conn = AsyncMock()
     create_client.return_value = kafka_consumer = MagicMock()
-    kafka_consumer.__aiter__.return_value = [MagicMock(value=pickle.dumps(url_stats))]
+    kafka_consumer.__aiter__.return_value = [
+        MagicMock(value=json.dumps(dataclasses.asdict(url_stats))),
+    ]
     asyncio.run(async_main(kafka_options, "postgresql://localhost", 0))
 
     assert sql_conn.mock_calls == [
