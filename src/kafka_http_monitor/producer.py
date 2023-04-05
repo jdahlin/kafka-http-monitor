@@ -45,7 +45,7 @@ async def async_main(  # noqa: PLR0913
                             json.dumps(dataclasses.asdict(url_stats)),
                         )
                 if i != times:
-                    time.sleep(wait_in_seconds)
+                    await asyncio.sleep(wait_in_seconds)
     except KafkaConnectionError:
         await producer.stop()
         typer.echo(
