@@ -1,8 +1,8 @@
 """Consumer for Kafka messages."""
 import asyncio
 import http
+import json
 import logging
-import pickle
 from typing import TYPE_CHECKING, Any, NewType, cast
 
 import typer
@@ -152,7 +152,7 @@ async def parse_message(
     message: ConsumerRecord,
 ) -> ResultTuple:
     """Parse a Kafka message."""
-    url_stats: "UrlStats" = pickle.loads(message.value)
+    url_stats: "UrlStats" = json.loads(message.value)
     regex_id = await insert_or_select_regex(sql_conn, url_stats.regex)
     url_id = await insert_or_select_url(sql_conn, url_stats.url)
     return (
