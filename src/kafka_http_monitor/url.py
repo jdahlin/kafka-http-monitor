@@ -58,7 +58,7 @@ async def probe_url(
         end = time.perf_counter_ns()
         response_time_in_milliseconds = (end - start) // 1_000_000
         response_status_code = http.HTTPStatus(response.status_code)
-        if regex is not None:
+        if regex:
             response_matched_regex = re.match(regex, response.text) is not None
 
     return UrlStats(
