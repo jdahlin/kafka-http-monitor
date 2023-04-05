@@ -1,7 +1,7 @@
 """Producer application for the kafka-http-monitor project."""
 import asyncio
+import json
 import logging
-import pickle
 import time
 
 import typer
@@ -23,7 +23,7 @@ async def async_main(  # noqa: PLR0913
     kafka_options: KafkaOptions,
     wait_in_seconds: int,
     times: int,
-    url: str,
+    urls: list[str],
     method: str,
     regex: str,
 ) -> None:
@@ -34,11 +34,12 @@ async def async_main(  # noqa: PLR0913
     try:
         async with producer:
             for i in range(1, last):
-                logger.info(f"Probing {method} {url} {i}/{times}")
-                url_stats = await probe_url(url=url, method=method, regex=regex)
-                logger.info("Submitting results")
-                for topic in kafka_options.topics:
-                    await producer.send_and_wait(topic, pickle.dumps(url_stats))
+                for url in urls:
+                    logger.info(f"Probing {method} {url} {i}/{times}")
+                    url_stats = await probe_url(url=url, method=method, regex=regex)
+                    logger.info("Submitting results")
+                    for topic in kafka_options.topics:
+                        await producer.send_and_wait(topic, json.dumps(url_stats))
                 if i != times:
                     time.sleep(wait_in_seconds)
     except KafkaConnectionError:
@@ -53,7 +54,7 @@ async def async_main(  # noqa: PLR0913
 
 def main(  # noqa: PLR0913
     topics: list[str],
-    url: str,
+    urls: list[str],
     method: str = "GET",
     times: int = 1,
     wait_in_seconds: int = 5,
@@ -79,7 +80,7 @@ def main(  # noqa: PLR0913
     )
     asyncio.run(
         async_main(
-            url=url,
+            urls=urls,
             method=method,
             times=times,
             wait_in_seconds=wait_in_seconds,
