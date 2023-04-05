@@ -3,7 +3,7 @@ import asyncio
 import http
 import json
 import logging
-from typing import TYPE_CHECKING, Any, NewType, cast
+from typing import Any, NewType, cast
 
 import typer
 from aiokafka import AIOKafkaConsumer, ConsumerRecord
@@ -16,9 +16,7 @@ from kafka_http_monitor.kafkahelper import (
     SecurityProtocol,
     create_client,
 )
-
-if TYPE_CHECKING:
-    from kafka_http_monitor.url import UrlStats
+from kafka_http_monitor.url import UrlStats
 
 logger = logging.getLogger(__name__)
 ResultTuple = tuple[int | None, int, http.HTTPStatus | None, int | None, bool]
@@ -152,7 +150,7 @@ async def parse_message(
     message: ConsumerRecord,
 ) -> ResultTuple:
     """Parse a Kafka message."""
-    url_stats: "UrlStats" = json.loads(message.value)
+    url_stats = UrlStats(**json.loads(message.value))
     regex_id = await insert_or_select_regex(sql_conn, url_stats.regex)
     url_id = await insert_or_select_url(sql_conn, url_stats.url)
     return (

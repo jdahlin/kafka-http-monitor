@@ -1,6 +1,7 @@
 """Kafka producer tests."""
 import asyncio
-import pickle
+import dataclasses
+import json
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 from aiokafka import AIOKafkaProducer
@@ -35,6 +36,6 @@ def test_async_main(
     assert create_client.mock_calls == [
         call(client_class=AIOKafkaProducer, options=kafka_options),
         call().__aenter__(),
-        call().send_and_wait("test", pickle.dumps(url_stats)),
+        call().send_and_wait("test", json.dumps(dataclasses.asdict(url_stats))),
         call().__aexit__(None, None, None),
     ]

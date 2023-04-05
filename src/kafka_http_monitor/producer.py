@@ -1,5 +1,6 @@
 """Producer application for the kafka-http-monitor project."""
 import asyncio
+import dataclasses
 import json
 import logging
 import time
@@ -39,7 +40,10 @@ async def async_main(  # noqa: PLR0913
                     url_stats = await probe_url(url=url, method=method, regex=regex)
                     logger.info("Submitting results")
                     for topic in kafka_options.topics:
-                        await producer.send_and_wait(topic, json.dumps(url_stats))
+                        await producer.send_and_wait(
+                            topic,
+                            json.dumps(dataclasses.asdict(url_stats)),
+                        )
                 if i != times:
                     time.sleep(wait_in_seconds)
     except KafkaConnectionError:
