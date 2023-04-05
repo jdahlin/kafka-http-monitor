@@ -186,7 +186,7 @@ async def async_main(
             received = 0
             async for message in consumer:
                 received = received + 1
-                logger.info("MESSAGE! %s %s", message, received)
+                logger.info("MESSAGE! %s %s", message.value, received)
                 record = await parse_message(sql_conn, message)
                 await sql_conn.copy_records_to_table(
                     RESULT_TABLE,
