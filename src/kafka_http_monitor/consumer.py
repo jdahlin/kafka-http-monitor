@@ -209,7 +209,7 @@ def main(  # noqa: PLR0913
     kafka_cluster: str = "localhost:9092",
     kafka_sasl_certificate: str = "kafka-ca.cer",
     kafka_sasl_mechanism: SaslMechanism = SaslMechanism.PLAIN,
-    kakfa_sasl_username: str = "",
+    kafka_sasl_username: str = "",
     kafka_sasl_password: str = "",
     kafka_security_protocol: SecurityProtocol = SecurityProtocol.PLAINTEXT,
     postgresql_url: str = "postgresql://postgres@localhost/postgres",
@@ -227,7 +227,7 @@ def main(  # noqa: PLR0913
         cluster=kafka_cluster,
         security_protocol=kafka_security_protocol,
         sasl_mechanism=kafka_sasl_mechanism,
-        sasl_username=kakfa_sasl_username or None,
+        sasl_username=kafka_sasl_username or None,
         sasl_password=kafka_sasl_password or None,
         sasl_certificate=kafka_sasl_certificate or None,
     )
