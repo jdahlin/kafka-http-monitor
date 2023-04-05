@@ -3,7 +3,6 @@ import asyncio
 import dataclasses
 import json
 import logging
-import time
 
 import typer
 from aiokafka import AIOKafkaProducer
